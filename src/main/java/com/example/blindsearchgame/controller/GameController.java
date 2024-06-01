@@ -1,25 +1,32 @@
 package com.example.blindsearchgame.controller;
 
 import com.example.blindsearchgame.model.Game;
-import org.springframework.web.bind.annotation.*;
+import com.example.blindsearchgame.model.Game.MoveRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.stereotype.Controller;
 
-@RestController
-@RequestMapping("/game")
+@Controller
 public class GameController {
+
     private Game game;
 
-    public GameController() {
-        game = new Game();
+    @Autowired
+    public GameController(Game game) {
+        this.game = game;
     }
 
-    @GetMapping("/status")
-    public Game getStatus() {
+    @MessageMapping("/move")
+    @SendTo("/topic/game")
+    public Game move(MoveRequest moveRequest) {
+        game.movePlayer(moveRequest.getPlayerId(), moveRequest.getAngle());
         return game;
     }
 
-    @PostMapping("/move")
-    public Game movePlayer(@RequestParam("playerId") int playerId, @RequestParam("angle") double angle) {
-        game.movePlayer(playerId, angle);
+    @MessageMapping("/status")
+    @SendTo("/topic/game")
+    public Game status() {
         return game;
     }
 }

@@ -7,16 +7,18 @@ public class Player {
     private double distanceToReward;
     private String color;
 
-    public Player() {}
+    private static final String[] COLORS = {"red", "green", "blue"};
 
-    // Getters and setters
+    public Player(int id, double x, double y, double distanceToReward) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.distanceToReward = distanceToReward;
+        this.color = COLORS[id];
+    }
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public double getX() {
@@ -45,9 +47,5 @@ public class Player {
 
     public String getColor() {
         return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
     }
 }

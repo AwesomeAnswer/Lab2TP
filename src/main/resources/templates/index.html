@@ -2,53 +2,14 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Blind Search Game</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            text-align: center;
-        }
-        #game-canvas {
-            border: 1px solid black;
-            background-color: #f0f0f0;
-            display: block;
-            margin: 0 auto;
-        }
-        .player-info {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-        .player-info div {
-            margin: 0 10px;
-        }
-        #move-form {
-            margin-top: 20px;
-        }
-        #angle-inputs {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-        .angle-input {
-            display: none;
-        }
-        .angle-input.active {
-            display: inline-block;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/css/styles.css">
 </head>
 <body>
 <div class="container">
     <h1>Blind Search Game</h1>
     <canvas id="game-canvas" width="500" height="500"></canvas>
     <div id="game-status"></div>
+    <div id="current-player-status"></div>
     <div id="angle-inputs">
         <div class="angle-input" id="angle-input-0">
             <label for="angle-0" style="color: red;">Player 1 Angle (degrees):</label>
@@ -69,89 +30,8 @@
     </form>
     <button id="show-reward-btn">Show Reward</button>
 </div>
-<script th:inline="javascript">
-    let currentPlayer = 0;
-    let showReward = false;
-
-    function updateGameStatus() {
-        fetch('/game/status')
-            .then(response => response.json())
-            .then(data => {
-                let statusDiv = document.getElementById('game-status');
-                let canvas = document.getElementById('game-canvas');
-                let ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                // Clear status div
-                statusDiv.innerHTML = '';
-
-                if (showReward) {
-                    // Draw reward
-                    let rewardX = canvas.width / 2 + data.rewardX * 5;
-                    let rewardY = canvas.height / 2 - data.rewardY * 5;
-                    ctx.fillStyle = 'gold';
-                    ctx.beginPath();
-                    ctx.arc(rewardX, rewardY, 5, 0, 2 * Math.PI);
-                    ctx.fill();
-                }
-
-                data.players.forEach(player => {
-                    // Draw player
-                    let playerX = canvas.width / 2 + player.x * 5;
-                    let playerY = canvas.height / 2 - player.y * 5;
-                    ctx.fillStyle = player.color;
-                    ctx.beginPath();
-                    ctx.arc(playerX, playerY, 5, 0, 2 * Math.PI);
-                    ctx.fill();
-
-                    // Draw direction arrow
-                    let angleInput = document.getElementById(`angle-${player.id}`).value || 0;
-                    let angle = angleInput * Math.PI / 180;
-                    let arrowX = playerX + 10 * Math.cos(angle);
-                    let arrowY = playerY - 10 * Math.sin(angle);
-                    ctx.beginPath();
-                    ctx.moveTo(playerX, playerY);
-                    ctx.lineTo(arrowX, arrowY);
-                    ctx.strokeStyle = player.color;
-                    ctx.stroke();
-
-                    statusDiv.innerHTML += `Player ${player.id + 1} (${player.color}): (${player.x.toFixed(2)}, ${player.y.toFixed(2)}) Distance to reward: ${player.distanceToReward.toFixed(2)}<br>`;
-                });
-
-                if (data.gameFinished) {
-                    statusDiv.innerHTML += '<strong>Game Over!</strong>';
-                }
-
-                // Update active angle input
-                document.querySelectorAll('.angle-input').forEach((input, index) => {
-                    input.classList.toggle('active', index === currentPlayer);
-                });
-
-                document.getElementById('playerId').value = currentPlayer;
-            });
-    }
-
-    document.getElementById('move-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        let playerId = currentPlayer;
-        let angle = document.getElementById(`angle-${playerId}`).value;
-        fetch(`/game/move?playerId=${playerId}&angle=${angle * Math.PI / 180}`, {method: 'POST'})
-            .then(() => {
-                updateGameStatus();
-                currentPlayer = (currentPlayer + 1) % 3;
-            });
-    });
-
-    document.getElementById('show-reward-btn').addEventListener('click', function() {
-        showReward = !showReward;
-        updateGameStatus();
-    });
-
-    document.querySelectorAll('.angle-input input').forEach(input => {
-        input.addEventListener('input', updateGameStatus);
-    });
-
-    updateGameStatus();
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="/js/script.js"></script>
 </body>
 </html>

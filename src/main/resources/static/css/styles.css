@@ -1,0 +1,47 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    text-align: center;
+}
+
+#game-canvas {
+    border: 1px solid black;
+    background-color: #f0f0f0;
+    display: block;
+    margin: 0 auto;
+}
+
+.player-info {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.player-info div {
+    margin: 0 10px;
+}
+
+#move-form {
+    margin-top: 20px;
+}
+
+#angle-inputs {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.angle-input {
+    display: none;
+}
+
+.angle-input.active {
+    display: inline-block;
+}

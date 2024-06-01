@@ -1,60 +1,72 @@
 package com.example.blindsearchgame.model;
 
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Random;
 
+@Component
 public class Game {
-    private static final double INITIAL_DISTANCE = 10;
-    private static final String[] COLORS = {"red", "green", "blue"};
-
-    private Player[] players;
-    private boolean gameFinished;
+    private List<Player> players;
     private double rewardX;
     private double rewardY;
+    private boolean gameFinished;
+    private int currentPlayer;
+    private static final double INITIAL_DISTANCE = 10;
 
     public Game() {
+        players = new ArrayList<>();
         Random rand = new Random();
-        rewardX = rand.nextDouble() * 50 - 25; // random x in range [-25, 25]
-        rewardY = rand.nextDouble() * 50 - 25; // random y in range [-25, 25]
-        players = new Player[3];
+        rewardX = rand.nextDouble() * 50 - 25;
+        rewardY = rand.nextDouble() * 50 - 25;
 
-        for (int i = 0; i < players.length; i++) {
+
+        for (int i = 0; i < 3; i++) {
+
             double angle = Math.toRadians(rand.nextInt(360));
-            players[i] = new Player();
-            players[i].setId(i);
-            players[i].setX(clamp(rewardX + INITIAL_DISTANCE * Math.cos(angle)));
-            players[i].setY(clamp(rewardY + INITIAL_DISTANCE * Math.sin(angle)));
-            players[i].setColor(COLORS[i]);
-            updateDistance(players[i]);
+            double playerX = clamp(rewardX+ INITIAL_DISTANCE*Math.cos(angle));
+            double playerY = clamp(rewardY+ INITIAL_DISTANCE*Math.sin(angle));
+            double playerDistance =calculateDistance(rewardX,playerX,rewardY,playerY);
+            players.add(new Player(i,playerX,playerY,playerDistance));
         }
         gameFinished = false;
-    }
-
-    private void updateDistance(Player player) {
-        double distance = Math.sqrt(Math.pow(player.getX() - rewardX, 2) + Math.pow(player.getY() - rewardY, 2));
-        player.setDistanceToReward(distance);
+        currentPlayer = 0;
     }
 
     public void movePlayer(int playerId, double angle) {
-        if (gameFinished) return;
-        Player player = players[playerId];
-        player.setX(clamp(player.getX() + Math.cos(angle)));
-        player.setY(clamp(player.getY() + Math.sin(angle)));
-        updateDistance(player);
-        if (player.getDistanceToReward() <= 1) {
-            gameFinished = true;
+        Player player = players.get(playerId);
+        if (gameFinished || playerId != currentPlayer) {
+            return;
         }
+        angle = Math.toRadians(angle);
+        double newX = player.getX() + Math.cos(angle);
+        double newY = player.getY() + Math.sin(angle);
+
+        newX = Math.max(-50, Math.min(50, newX));
+        newY = Math.max(-50, Math.min(50, newY));
+        player.setX(newX);
+        player.setY(newY);
+        double distance = Math.sqrt(Math.pow(newX - rewardX, 2) + Math.pow(newY - rewardY, 2));
+        player.setDistanceToReward(distance);
+        if (distance <= 1) {
+            gameFinished = true;
+        } else {
+            currentPlayer = (currentPlayer + 1) % 3;
+        }
+    }
+
+
+    private double calculateDistance(double x1,double x2,double y1,double y2) {
+        return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     }
 
     private double clamp(double value) {
         return Math.max(-50, Math.min(50, value));
     }
 
-    public Player[] getPlayers() {
+    public List<Player> getPlayers() {
         return players;
-    }
-
-    public boolean isGameFinished() {
-        return gameFinished;
     }
 
     public double getRewardX() {
@@ -63,5 +75,34 @@ public class Game {
 
     public double getRewardY() {
         return rewardY;
+    }
+
+    public boolean isGameFinished() {
+        return gameFinished;
+    }
+
+    public int getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public static class MoveRequest {
+        private int playerId;
+        private double angle;
+
+        public int getPlayerId() {
+            return playerId;
+        }
+
+        public void setPlayerId(int playerId) {
+            this.playerId = playerId;
+        }
+
+        public double getAngle() {
+            return angle;
+        }
+
+        public void setAngle(double angle) {
+            this.angle = angle;
+        }
     }
 }
