@@ -10,7 +10,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class GameController {
 
-    private Game game;
+    private final Game game;
 
     @Autowired
     public GameController(Game game) {

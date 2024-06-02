@@ -25,8 +25,8 @@ public class Game {
         for (int i = 0; i < 3; i++) {
 
             double angle = Math.toRadians(rand.nextInt(360));
-            double playerX = clamp(rewardX+ INITIAL_DISTANCE*Math.cos(angle));
-            double playerY = clamp(rewardY+ INITIAL_DISTANCE*Math.sin(angle));
+            double playerX = setCord(rewardX+INITIAL_DISTANCE*Math.cos(angle));
+            double playerY = setCord(rewardY+INITIAL_DISTANCE*Math.sin(angle));
             double playerDistance =calculateDistance(rewardX,playerX,rewardY,playerY);
             players.add(new Player(i,playerX,playerY,playerDistance));
         }
@@ -43,11 +43,11 @@ public class Game {
         double newX = player.getX() + Math.cos(angle);
         double newY = player.getY() + Math.sin(angle);
 
-        newX = Math.max(-50, Math.min(50, newX));
-        newY = Math.max(-50, Math.min(50, newY));
+        newX = setCord(newX);
+        newY = setCord(newY);
         player.setX(newX);
         player.setY(newY);
-        double distance = Math.sqrt(Math.pow(newX - rewardX, 2) + Math.pow(newY - rewardY, 2));
+        double distance = calculateDistance(newX,rewardX,newY,rewardY);
         player.setDistanceToReward(distance);
         if (distance <= 1) {
             gameFinished = true;
@@ -61,7 +61,7 @@ public class Game {
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     }
 
-    private double clamp(double value) {
+    private double setCord(double value) {
         return Math.max(-50, Math.min(50, value));
     }
 
